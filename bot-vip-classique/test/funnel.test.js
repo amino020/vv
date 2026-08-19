@@ -65,13 +65,16 @@ test('cache un bouton avant-goût tant que sa vidéo brouillon n’est pas prêt
   assert.equal(keyboardForStep(config.steps[0], config, '123').inline_keyboard[0][0].text, 'Avant-goût');
 });
 
-test('prépare deux boutons et deux emplacements vidéo pour les avant-goûts', () => {
-  const offer = DEFAULT_FUNNEL.steps.find((step) => step.id === 'vip-explained');
-  const teaserTargets = offer.buttons.filter((button) => button.target === 'weekly-content' || button.target === 'teaser-two');
-  const videoSlots = DEFAULT_FUNNEL.steps.filter((step) => teaserTargets.some((button) => button.target === step.id));
-  assert.equal(teaserTargets.length, 2);
-  assert.equal(videoSlots.length, 2);
-  assert.ok(videoSlots.every((step) => step.mediaType === 'video' && step.active === false));
+test('exporte les messages et médias configurés dans le panel', () => {
+  const videos = DEFAULT_FUNNEL.steps.filter((step) => step.mediaType === 'video');
+  const usedMedia = new Set(DEFAULT_FUNNEL.steps.map((step) => step.media).filter(Boolean));
+  assert.equal(DEFAULT_FUNNEL.steps.length, 13);
+  assert.equal(DEFAULT_FUNNEL.steps.filter((step) => step.active !== false).length, 13);
+  assert.deepEqual(videos.map((step) => step.id), ['weekly-content', 'join', 'teaser-two']);
+  assert.ok(videos.every((step) => step.media.endsWith('.mp4')));
+  assert.ok(usedMedia.has('/media/758183e5-a128-4222-b617-7addcf499bce.mp4'));
+  assert.ok(usedMedia.has('/media/5137809a-02a5-4c39-bdfb-5d5af11137a6.mp4'));
+  assert.ok(usedMedia.has('/media/1c904398-df33-4a27-a3b5-ec7bee82d5df.mp4'));
 });
 
 test('enchaîne deux étapes d’avant-goût avant de présenter le VIP', () => {
@@ -92,10 +95,11 @@ test('décrit clairement le contenu adulte inclus dans le VIP', () => {
   assert.doesNotMatch(publishedCopy, /NSFW/i);
   assert.match(publishedCopy, /nudes/i);
   assert.match(publishedCopy, /sextapes/i);
-  assert.match(publishedCopy, /copines/i);
-  assert.match(publishedCopy, /maîtresse/i);
-  assert.match(publishedCopy, /soumise/i);
-  assert.match(publishedCopy, /contenus personnalisés/i);
+  assert.match(publishedCopy, /lesbiennes/i);
+  assert.match(publishedCopy, /domination/i);
+  assert.match(publishedCopy, /soumission/i);
+  assert.match(publishedCopy, /jeux de rôle/i);
+  assert.match(publishedCopy, /fantasme/i);
   assert.doesNotMatch(publishedCopy, /maitrsse|toute nues|vidéos seul\b/i);
   assert.match(DEFAULT_FUNNEL.adultNotice, /18\+/);
 });
