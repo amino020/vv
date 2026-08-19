@@ -1,0 +1,13 @@
+.env
+data/state.json
+data/state.json.tmp
+data/runtime.lock
+data/media/*
+!data/media/.gitkeep
+!data/media/portrait-emma.jpg
+!data/media/apercu-emma.jpg
+!data/media/apercu-bikini-emma.jpg
+!data/media/apercu-lingerie-emma-2.jpg
+!data/media/miroir-emma-1.jpg
+!data/media/miroir-emma-2.jpg
+!data/media/portrait-emma-2.jpg

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Studio VIP · bot classique</title>
+  <meta name="description" content="Panneau local pour configurer un parcours Telegram VIP sans IA.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="auth-gate is-hidden" id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <form class="auth-card" id="auth-form">
+      <span class="kicker">Accès privé</span>
+      <h1 id="auth-title">Ouvrir le studio</h1>
+      <p>Entre le jeton administrateur défini dans le fichier <code>.env</code>.</p>
+      <label>Jeton administrateur<input id="admin-token" type="password" autocomplete="current-password" required></label>
+      <button class="primary-button" type="submit">Ouvrir le panneau</button>
+      <p class="form-error" id="auth-error" role="alert"></p>
+    </form>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-lockup">
+        <span class="brand-mark">E</span>
+        <div><strong>Studio VIP</strong><small>Parcours Telegram</small></div>
+      </div>
+      <nav aria-label="Navigation principale">
+        <button class="nav-item is-active" data-view="journey"><span class="nav-label"><span class="nav-full">Parcours</span><span class="nav-short">Parcours</span></span><b id="nav-step-count">0</b></button>
+        <button class="nav-item" data-view="offer"><span class="nav-label"><span class="nav-full">Offre & liens</span><span class="nav-short">Offre</span></span></button>
+        <button class="nav-item" data-view="leads"><span class="nav-label"><span class="nav-full">Prospects</span><span class="nav-short">Prospects</span></span><b id="nav-claim-count">0</b></button>
+        <button class="nav-item" data-view="connections"><span class="nav-label"><span class="nav-full">Connexions</span><span class="nav-short">Connexions</span></span></button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="live-state"><i id="telegram-dot"></i><span id="telegram-label">Chargement…</span></div>
+        <small>Bot déterministe · aucune IA</small>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <span class="kicker">Séquence active</span>
+          <h1 id="page-title">Le parcours d’Emma</h1>
+        </div>
+        <div class="top-actions">
+          <span class="save-state" id="save-state">À jour</span>
+          <button class="quiet-button" id="test-button" type="button">Envoyer un test</button>
+          <button class="primary-button" id="save-button" type="button">Enregistrer</button>
+        </div>
+      </header>
+
+      <div class="notice is-hidden" id="notice" role="status"></div>
+
+      <section class="view is-active" data-view-panel="journey">
+        <div class="metrics" id="metrics"></div>
+        <div class="workspace-grid">
+          <div>
+            <div class="section-heading">
+              <div><span class="kicker">Message après message</span><h2>Chemin vers le VIP</h2></div>
+              <div class="section-actions">
+                <button class="quiet-button" id="reset-funnel" type="button">Réinitialiser</button>
+                <button class="secondary-button" id="add-step" type="button">Ajouter une étape</button>
+              </div>
+            </div>
+            <div class="story-rail" id="steps-list"></div>
+          </div>
+          <aside class="phone-column" aria-label="Aperçu Telegram">
+            <div class="phone-caption"><span>Aperçu en direct</span><small id="preview-step-title"></small></div>
+            <div class="phone">
+              <div class="phone-top"><i></i><strong id="preview-brand">Emma</strong><span>bot</span></div>
+              <div class="chat-wall">
+                <div class="message-card" id="preview-message"></div>
+              </div>
+              <div class="phone-input"><span>Message</span><b>➤</b></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="offer">
+        <div class="narrow-page">
+          <div class="section-heading"><div><span class="kicker">Ce que les boutons ouvrent</span><h2>Offre, accès et réponses</h2></div></div>
+          <div class="form-panel">
+            <div class="field-grid two">
+              <label>Nom affiché<input id="brand-name" type="text" maxlength="120"></label>
+              <label>Ton @ Telegram<input id="creator-username" type="text" placeholder="@emma"></label>
+              <label class="wide">Lien de paiement Stripe<input id="payment-link" type="url" placeholder="https://buy.stripe.com/..."><small>Le bot ajoute automatiquement une référence Telegram unique au lien.</small></label>
+              <label>Lien du canal de preuves<input id="proof-link" type="url" placeholder="https://t.me/..."></label>
+              <label>Lien d’invitation VIP après validation<input id="vip-link" type="url" placeholder="https://t.me/+..."></label>
+            </div>
+          </div>
+          <div class="form-panel">
+            <span class="panel-number">Textes système</span>
+            <label>Résumé de l’abonnement<textarea id="price-text" rows="2"></textarea></label>
+            <label>Réponse après « J’ai payé »<textarea id="claim-reply" rows="3"></textarea><small>Cette réponse ouvre ton profil mais ne valide pas le paiement.</small></label>
+            <label>Réponse après vérification<textarea id="verified-reply" rows="3"></textarea></label>
+            <label>Mention 18+<textarea id="adult-notice" rows="2"></textarea></label>
+          </div>
+          <div class="safety-note">
+            <strong>Règle de sécurité</strong>
+            <p>Une capture ou la phrase « j’ai payé » crée une revue. Seul Stripe signé ou ton bouton « Valider » accorde l’accès.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="leads">
+        <div class="section-heading">
+          <div><span class="kicker">File opérateur</span><h2>Prospects et paiements</h2></div>
+          <div class="lead-toolbar">
+            <input id="lead-search" type="search" placeholder="Chercher un @ ou un identifiant" aria-label="Rechercher un prospect">
+            <div class="filter-row" id="lead-filters">
+              <button class="filter is-active" data-filter="all">Tous</button>
+              <button class="filter" data-filter="claimed">À vérifier</button>
+              <button class="filter" data-filter="verified">VIP</button>
+            </div>
+          </div>
+        </div>
+        <div class="lead-list" id="lead-list"></div>
+      </section>
+
+      <section class="view" data-view-panel="connections">
+        <div class="narrow-page">
+          <div class="section-heading"><div><span class="kicker">État technique</span><h2>Connexions</h2></div></div>
+          <form class="form-panel telegram-connect-panel" id="telegram-connect-form">
+            <div class="connect-heading">
+              <div><span class="panel-number">Ajouter le bot</span><h3 id="connected-bot-name">Bot Telegram</h3></div>
+              <span class="connection-chip" id="telegram-connect-chip">Non configuré</span>
+            </div>
+            <div class="field-grid two">
+              <label>Token donné par BotFather<input id="telegram-bot-token" type="password" autocomplete="off" placeholder="123456:ABC…"><small>Laisse vide pour conserver le token déjà actif.</small></label>
+              <label>Ton identifiant de chat opérateur<input id="telegram-operator-id" inputmode="numeric" placeholder="Exemple : 123456789"><small>Après la première activation, envoie <code>/id</code> au bot pour l’obtenir.</small></label>
+            </div>
+            <div class="connect-actions">
+              <p id="telegram-connect-help">Le token est testé avant d’être enregistré.</p>
+              <button class="primary-button" id="telegram-connect-button" type="submit">Tester et activer</button>
+            </div>
+          </form>
+          <div class="connection-grid" id="connection-grid"></div>
+          <div class="form-panel setup-panel">
+            <span class="panel-number">Configuration locale</span>
+            <p>Les secrets restent dans <code>.env</code> et ne sont jamais renvoyés au navigateur.</p>
+            <dl>
+              <div><dt>Bot Telegram</dt><dd><code>TELEGRAM_BOT_TOKEN</code></dd></div>
+              <div><dt>Réception des preuves</dt><dd><code>TELEGRAM_OPERATOR_CHAT_ID</code></dd></div>
+              <div><dt>Validation automatique</dt><dd><code>STRIPE_WEBHOOK_SECRET</code></dd></div>
+              <div><dt>Adresse Stripe</dt><dd><code id="webhook-path">/webhooks/stripe</code></dd></div>
+            </dl>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="empty-leads-template">
+    <div class="empty-state"><span>◇</span><h3>Aucun prospect ici</h3><p>Les personnes qui lancent le bot apparaîtront dans cette file.</p></div>
+  </template>
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
